@@ -66,7 +66,7 @@ make_newdata <- function(state_uc, age_band, sex, ysdx, died, inst_flag) {
   )
 }
 
-predict_from_coefficients <- function(newdata, force_inst_positive = FALSE) {
+predict_from_coefficients <- function(newdata) {
   x1 <- model.matrix(form_p1, data = newdata)
   x2 <- model.matrix(form_p2, data = newdata)
 
@@ -84,10 +84,6 @@ predict_from_coefficients <- function(newdata, force_inst_positive = FALSE) {
   eta_p2 <- as.numeric(x2 %*% beta_p2[colnames(x2)])
 
   probability_any_cost <- plogis(eta_p1)
-  if (isTRUE(force_inst_positive)) {
-    probability_any_cost <- ifelse(newdata$inst_flag == "Yes", 1, probability_any_cost)
-  }
-
   positive_cost_mean <- exp(eta_p2)
   predicted_annual_cost <- probability_any_cost * positive_cost_mean
 
@@ -120,11 +116,6 @@ ui <- fluidPage(
       selectInput("ysdx", "Years since diagnosis / index interval", choices = ysdx_levels, selected = "0"),
       selectInput("died", "Death during interval", choices = died_levels, selected = "Alive"),
       selectInput("inst_flag", "Institutionalized during interval", choices = inst_levels, selected = "No"),
-      checkboxInput(
-        "force_inst_positive",
-        "Sensitivity: force probability of any formal-care cost to 100% when institutionalized",
-        value = FALSE
-      ),
       hr(),
       downloadButton("download_state_table", "Download state comparison")
     ),
@@ -191,10 +182,7 @@ server <- function(input, output, session) {
   })
 
   scenario_prediction <- reactive({
-    predict_from_coefficients(
-      scenario_data(),
-      force_inst_positive = input$force_inst_positive
-    )
+    predict_from_coefficients(scenario_data())
   })
 
   state_predictions <- reactive({
@@ -206,10 +194,7 @@ server <- function(input, output, session) {
       died = input$died,
       inst_flag = input$inst_flag
     )
-    pred <- predict_from_coefficients(
-      nd,
-      force_inst_positive = input$force_inst_positive
-    )
+    pred <- predict_from_coefficients(nd)
     data.frame(
       state = state_levels,
       probability_any_cost = pred$probability_any_cost,
