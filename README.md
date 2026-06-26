@@ -37,6 +37,10 @@ docs/
   data_availability.md
 ```
 
+## Live Calculator
+
+Try the calculator here: [AD Formal-Care Cost Calculator](https://yohannesbalcha.shinyapps.io/ad-formal-care-cost-calculator/)
+
 ## Running the App Locally
 
 Install required R packages:
