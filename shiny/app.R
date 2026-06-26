@@ -117,11 +117,13 @@ ui <- fluidPage(
       selectInput("died", "Death during interval", choices = died_levels, selected = "Alive"),
       selectInput("inst_flag", "Institutionalized during interval", choices = inst_levels, selected = "No"),
       hr(),
-      downloadButton("download_state_table", "Download state comparison")
+      downloadButton("download_state_table", "Download scenario comparison")
     ),
 
     mainPanel(
-      h3("Single-scenario estimate"),
+      h3("Selected profile"),
+      uiOutput("profile_summary"),
+
       fluidRow(
         column(
           4,
@@ -140,7 +142,7 @@ ui <- fluidPage(
         column(
           4,
           wellPanel(
-            h4("Mean positive cost"),
+            h4("Mean cost if positive"),
             h2(textOutput("pred_positive"))
           )
         )
@@ -155,8 +157,13 @@ ui <- fluidPage(
         )
       ),
 
-      h3("Comparison across dementia states"),
-      plotOutput("state_plot", height = "360px"),
+      h3("Dementia-state scenario comparison"),
+      tags$p(
+        class = "text-muted",
+        "This panel keeps age group, sex, years since diagnosis/index interval, death during interval, and institutionalization fixed, ",
+        "then recalculates expected annual cost after changing only the dementia-state input. The selected state is highlighted."
+      ),
+      plotOutput("state_plot", height = "390px"),
       tableOutput("state_table"),
 
       tags$hr(),
@@ -195,11 +202,28 @@ server <- function(input, output, session) {
       inst_flag = input$inst_flag
     )
     pred <- predict_from_coefficients(nd)
-    data.frame(
-      state = state_levels,
+    out <- data.frame(
+      state = factor(state_levels, levels = state_levels),
       probability_any_cost = pred$probability_any_cost,
       mean_positive_cost = pred$positive_cost_mean,
       expected_annual_cost = pred$predicted_annual_cost
+    )
+    out$difference_vs_no_dementia <- out$expected_annual_cost - out$expected_annual_cost[out$state == "No dementia"]
+    out$selected_profile <- as.character(out$state) == input$state_uc
+    out
+  })
+
+  output$profile_summary <- renderUI({
+    tags$p(
+      class = "text-muted",
+      paste(
+        input$state_uc,
+        "| age", input$age_band,
+        "|", ifelse(input$sex == "FEMALE", "female", "male"),
+        "| year", input$ysdx,
+        "|", tolower(input$died),
+        "| institutionalized:", tolower(input$inst_flag)
+      )
     )
   })
 
@@ -217,14 +241,17 @@ server <- function(input, output, session) {
 
   output$state_plot <- renderPlot({
     plot_data <- state_predictions()
-    ggplot(plot_data, aes(x = state, y = expected_annual_cost)) +
-      geom_col(fill = "#0072B2", width = 0.68) +
+    plot_data$plot_state <- factor(as.character(plot_data$state), levels = rev(state_levels))
+    ggplot(plot_data, aes(x = plot_state, y = expected_annual_cost, fill = selected_profile)) +
+      geom_col(width = 0.68) +
       geom_text(
         aes(label = scales::comma(round(expected_annual_cost, 0))),
-        vjust = -0.35,
+        hjust = -0.08,
         size = 3.7
       ) +
-      scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.12))) +
+      coord_flip() +
+      scale_fill_manual(values = c(`FALSE` = "#8FBBD9", `TRUE` = "#D55E00"), guide = "none") +
+      scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.16))) +
       labs(
         x = NULL,
         y = "Expected annual formal-care cost (SEK)"
@@ -232,17 +259,19 @@ server <- function(input, output, session) {
       theme_bw(base_size = 13) +
       theme(
         panel.grid.minor = element_blank(),
-        axis.text.x = element_text(angle = 15, hjust = 1)
+        panel.grid.major.y = element_blank()
       )
   })
 
   output$state_table <- renderTable({
     x <- state_predictions()
     data.frame(
-      "Dementia state" = x$state,
+      "Dementia state" = as.character(x$state),
+      "Selected" = ifelse(x$selected_profile, "Yes", ""),
       "Probability of any cost" = scales::percent(x$probability_any_cost, accuracy = 0.1),
-      "Mean positive cost" = format_money(x$mean_positive_cost),
+      "Mean cost if positive" = format_money(x$mean_positive_cost),
       "Expected annual cost" = format_money(x$expected_annual_cost),
+      "Difference vs no dementia" = format_money(x$difference_vs_no_dementia),
       check.names = FALSE
     )
   })
