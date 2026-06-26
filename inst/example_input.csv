@@ -1,0 +1,6 @@
+state_uc,age_band,sex,ysdx,died,inst_flag
+No dementia,75-84,FEMALE,0,Alive,No
+Very mild,75-84,FEMALE,0,Alive,No
+Mild,75-84,FEMALE,0,Alive,No
+Moderate,75-84,FEMALE,0,Alive,No
+Severe,75-84,FEMALE,0,Alive,No

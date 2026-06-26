@@ -1,0 +1,7 @@
+variable,description,allowed_values
+state_uc,Dementia state or control state,"No dementia; Very mild; Mild; Moderate; Severe"
+age_band,Age group at interval start,"<65; 65-74; 75-84; 85-89; 90+"
+sex,Sex,"FEMALE; MALE"
+ysdx,Years since diagnosis or matched index interval,"0; 1; 2; 3; 4; 5; 6; 7"
+died,Death during interval,"Alive; Died"
+inst_flag,Institutionalized during interval,"No; Yes"

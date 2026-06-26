@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "AD Formal-Care Cost Calculator"
+message: "Please cite the accompanying manuscript when using this cost-function implementation."
+type: software
+authors:
+  - family-names: Balcha
+    given-names: Yohannes Mengistu
+date-released: 2026-06-26
+license: MIT
+repository-code: "https://github.com/yohannesbalcha/ad-formal-care-cost-calculator"

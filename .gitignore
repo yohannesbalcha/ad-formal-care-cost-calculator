@@ -1,0 +1,40 @@
+# R session/local files
+.Rhistory
+.RData
+.RDataTmp
+.Ruserdata
+.Rproj.user/
+.Renviron
+
+# Local/editor files
+.DS_Store
+.vscode/
+
+# Restricted or patient-derived data
+data/
+results/
+*.rds
+*.RDS
+*.rda
+*.RData
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.sav
+*.dta
+*.sas7bdat
+*.parquet
+*.feather
+*.fst
+
+# Manuscript/private drafts
+*.doc
+*.docx
+*.pdf
+
+# Allow curated public CSVs
+!shiny/model_coefficients_part1_logit.csv
+!shiny/model_coefficients_part2_gamma_log.csv
+!inst/example_input.csv
+!inst/variable_dictionary.csv
