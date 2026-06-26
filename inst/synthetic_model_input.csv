@@ -1,0 +1,101 @@
+state_uc,age_band,sex,ysdx,died,inst_flag
+Moderate,65-74,FEMALE,0,Alive,No
+Very mild,65-74,MALE,4,Alive,No
+Moderate,75-84,FEMALE,0,Alive,No
+Moderate,75-84,MALE,4,Alive,Yes
+No dementia,75-84,FEMALE,1,Alive,No
+No dementia,75-84,FEMALE,1,Alive,No
+Mild,65-74,MALE,6,Alive,No
+Mild,75-84,FEMALE,1,Died,No
+Very mild,75-84,MALE,2,Alive,No
+Severe,75-84,FEMALE,0,Died,No
+Severe,90+,MALE,1,Alive,Yes
+Mild,75-84,MALE,0,Alive,No
+No dementia,65-74,MALE,6,Alive,Yes
+No dementia,85-89,FEMALE,1,Alive,No
+Mild,75-84,FEMALE,4,Alive,No
+Very mild,75-84,FEMALE,4,Alive,No
+Mild,65-74,FEMALE,1,Alive,Yes
+No dementia,75-84,FEMALE,2,Alive,No
+Moderate,75-84,FEMALE,2,Alive,No
+Very mild,75-84,FEMALE,1,Alive,Yes
+No dementia,85-89,FEMALE,3,Alive,No
+Moderate,75-84,MALE,5,Alive,No
+Mild,85-89,MALE,3,Alive,Yes
+Moderate,65-74,FEMALE,0,Died,No
+Mild,75-84,MALE,6,Alive,No
+Mild,85-89,FEMALE,1,Alive,No
+Mild,75-84,FEMALE,3,Died,No
+Mild,85-89,FEMALE,2,Died,Yes
+Severe,75-84,FEMALE,2,Alive,No
+Very mild,90+,MALE,4,Alive,Yes
+Moderate,75-84,FEMALE,0,Alive,No
+Moderate,65-74,FEMALE,5,Alive,No
+No dementia,75-84,MALE,4,Alive,No
+Moderate,75-84,FEMALE,1,Alive,No
+No dementia,<65,FEMALE,3,Alive,Yes
+Mild,90+,FEMALE,5,Alive,Yes
+No dementia,65-74,MALE,4,Alive,Yes
+Mild,90+,FEMALE,0,Alive,Yes
+Mild,75-84,FEMALE,3,Alive,No
+Mild,65-74,FEMALE,0,Alive,No
+Mild,90+,MALE,2,Alive,No
+Mild,<65,MALE,1,Died,No
+No dementia,75-84,MALE,0,Died,No
+Very mild,85-89,MALE,0,Alive,No
+Severe,65-74,MALE,7,Died,Yes
+Mild,85-89,FEMALE,1,Alive,No
+Moderate,75-84,MALE,4,Alive,No
+Moderate,65-74,MALE,2,Alive,No
+Severe,75-84,MALE,0,Alive,No
+No dementia,85-89,MALE,5,Alive,Yes
+Mild,75-84,FEMALE,0,Alive,Yes
+Mild,90+,MALE,4,Alive,No
+Moderate,85-89,MALE,1,Alive,No
+No dementia,65-74,MALE,4,Alive,Yes
+Very mild,65-74,FEMALE,6,Alive,No
+No dementia,85-89,FEMALE,7,Alive,No
+Mild,75-84,FEMALE,2,Alive,No
+Very mild,75-84,MALE,0,Died,No
+Mild,75-84,FEMALE,3,Alive,No
+No dementia,65-74,FEMALE,7,Died,Yes
+Severe,65-74,MALE,0,Alive,No
+Very mild,85-89,FEMALE,2,Died,Yes
+Very mild,75-84,FEMALE,1,Alive,Yes
+No dementia,85-89,MALE,3,Alive,No
+Very mild,75-84,MALE,0,Alive,No
+Moderate,85-89,MALE,3,Alive,No
+No dementia,85-89,FEMALE,3,Alive,No
+Moderate,90+,FEMALE,5,Alive,No
+Mild,65-74,MALE,6,Alive,Yes
+No dementia,75-84,FEMALE,6,Alive,Yes
+No dementia,85-89,FEMALE,1,Died,Yes
+Mild,65-74,FEMALE,4,Alive,No
+Very mild,75-84,FEMALE,3,Alive,No
+Very mild,65-74,FEMALE,1,Alive,No
+Severe,65-74,FEMALE,1,Alive,No
+Mild,75-84,MALE,1,Alive,No
+No dementia,65-74,FEMALE,2,Alive,No
+No dementia,90+,FEMALE,3,Alive,No
+Very mild,65-74,MALE,6,Alive,No
+Moderate,75-84,FEMALE,0,Alive,Yes
+No dementia,90+,FEMALE,2,Alive,Yes
+Very mild,85-89,MALE,5,Alive,No
+Very mild,85-89,FEMALE,5,Died,Yes
+Moderate,65-74,FEMALE,4,Alive,No
+Moderate,75-84,MALE,2,Alive,No
+No dementia,75-84,FEMALE,5,Alive,No
+Very mild,85-89,MALE,6,Alive,No
+No dementia,65-74,FEMALE,3,Alive,Yes
+Very mild,75-84,MALE,2,Died,No
+Mild,85-89,FEMALE,2,Alive,No
+Moderate,75-84,FEMALE,2,Alive,No
+Moderate,75-84,FEMALE,4,Died,No
+No dementia,75-84,FEMALE,0,Alive,No
+Mild,65-74,MALE,1,Alive,No
+Severe,75-84,MALE,0,Alive,No
+Mild,85-89,MALE,0,Alive,No
+No dementia,85-89,FEMALE,0,Alive,No
+No dementia,85-89,FEMALE,1,Alive,Yes
+Mild,75-84,FEMALE,1,Alive,No
+Severe,75-84,MALE,1,Alive,No

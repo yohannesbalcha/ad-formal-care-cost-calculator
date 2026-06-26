@@ -43,3 +43,7 @@ Institutionalization and death are interval-level descriptors. They are included
 
 The model is not designed to estimate causal effects of dementia severity, institutionalization, or death.
 
+
+## Public Implementation
+
+The public repository includes coefficient-based prediction code and a model-development template. The template documents the final model structure but does not include the registry dataset used for estimation.

@@ -41,3 +41,9 @@ results/
 !shiny/model_coefficients_part2_gamma_log.csv
 !inst/example_input.csv
 !inst/variable_dictionary.csv
+
+!inst/synthetic_model_input.csv
+!inst/synthetic_model_input.xlsx
+!R/
+!R/predict_cost_from_coefficients.R
+!R/generate_synthetic_example_data.R

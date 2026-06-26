@@ -76,14 +76,11 @@ shiny::runGitHub(
 )
 ```
 
-## Deploying to shinyapps.io
 
-After creating a shinyapps.io account, run the `rsconnect::setAccountInfo(...)` command from shinyapps.io locally in R. Do not save tokens in this repository.
+## Public Template Scripts
 
-Then deploy from the repository root:
+The `R/` folder contains public-safe scripts for using the coefficient tables, documenting the model structure, and generating synthetic example data. These scripts do not contain registry data, private paths, or fitted model objects.
 
-```r
-source("deploy/deploy_shinyapps.R")
-```
+## Synthetic Trial Data
 
-After deployment, add the live app URL to this README.
+Synthetic input files are provided in `inst/` for testing the app structure and prediction code. These data are randomly generated and are not derived from the Swedish registry data.

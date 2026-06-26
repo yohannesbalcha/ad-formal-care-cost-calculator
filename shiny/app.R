@@ -98,11 +98,9 @@ format_money <- function(x) {
   paste0("SEK ", scales::comma(round(x, 0)))
 }
 
-profile_inputs <- function(prefix, include_state = TRUE) {
+profile_inputs <- function(prefix) {
   tagList(
-    if (include_state) {
-      selectInput(paste0(prefix, "state_uc"), "Dementia state", choices = state_levels, selected = "No dementia")
-    },
+    selectInput(paste0(prefix, "state_uc"), "Dementia state", choices = state_levels, selected = "No dementia"),
     selectInput(paste0(prefix, "age_band"), "Age group", choices = age_levels, selected = "75-84"),
     selectInput(paste0(prefix, "sex"), "Sex", choices = sex_levels, selected = "FEMALE"),
     selectInput(paste0(prefix, "ysdx"), "Years since diagnosis / index interval", choices = ysdx_levels, selected = "0"),
@@ -116,82 +114,46 @@ ui <- fluidPage(
 
   tags$div(
     class = "alert alert-info",
-    tags$strong("Interpretation: "),
-    "This calculator estimates conditional expected annual formal-care costs for specified interval-level covariates. ",
-    "It is intended for research and economic-model scenarios, not causal inference or individual clinical decision-making."
+    tags$strong("Purpose: "),
+    "Estimate conditional expected annual formal-care costs for specified interval-level profiles."
   ),
 
   tabsetPanel(
-    id = "main_tabs",
-
     tabPanel(
       "Calculator",
       sidebarLayout(
         sidebarPanel(
-          profile_inputs("calc_", include_state = TRUE)
+          profile_inputs("calc_")
         ),
         mainPanel(
-          h3("Selected profile estimate"),
-          uiOutput("calc_profile_summary"),
+          h3("Selected profile"),
+          uiOutput("profile_summary"),
           fluidRow(
-            column(
-              4,
-              wellPanel(
-                h4("Expected annual cost"),
-                h2(textOutput("calc_total"))
-              )
-            ),
-            column(
-              4,
-              wellPanel(
-                h4("Probability of any cost"),
-                h2(textOutput("calc_prob"))
-              )
-            ),
-            column(
-              4,
-              wellPanel(
-                h4("Mean cost if positive"),
-                h2(textOutput("calc_positive"))
-              )
-            )
+            column(4, wellPanel(h4("Expected annual cost"), h2(textOutput("pred_total")))),
+            column(4, wellPanel(h4("Probability of any cost"), h2(textOutput("pred_prob")))),
+            column(4, wellPanel(h4("Mean cost if positive"), h2(textOutput("pred_positive"))))
           ),
-          uiOutput("calc_constructed_warning"),
-          tags$hr(),
+          h3("Dementia-state scenario comparison"),
           tags$p(
             class = "text-muted",
-            "This tab estimates one selected profile. It does not compare dementia states."
-          )
+            "The comparison below keeps age group, sex, year, death status, and institutionalization fixed, ",
+            "then recalculates expected annual cost across dementia states. The selected state is highlighted."
+          ),
+          plotOutput("state_plot", height = "390px"),
+          tableOutput("state_table")
         )
       )
     ),
 
     tabPanel(
-      "Compare dementia states",
-      sidebarLayout(
-        sidebarPanel(
-          profile_inputs("cmp_", include_state = FALSE),
-          hr(),
-          downloadButton("download_state_table", "Download comparison")
-        ),
-        mainPanel(
-          h3("Dementia-state scenario comparison"),
-          tags$p(
-            class = "text-muted",
-            "This tab keeps age group, sex, years since diagnosis/index interval, death during interval, and institutionalization fixed, ",
-            "then recalculates expected annual cost after changing only the dementia-state input."
-          ),
-          uiOutput("cmp_interaction_warning"),
-          plotOutput("cmp_state_plot", height = "390px"),
-          tableOutput("cmp_state_table"),
-          tags$hr(),
-          tags$p(
-            class = "text-muted",
-            "Differences are conditional scenario contrasts versus the no-dementia profile with the same non-state covariates. ",
-            "They should not be interpreted as causal effects."
-          )
-        )
-      )
+      "Reference profile",
+      h3("Reference profile severity gradient"),
+      tags$p(
+        class = "text-muted",
+        "Reference profile: female, age 75-84, year 0, alive, not institutionalized."
+      ),
+      plotOutput("reference_plot", height = "390px"),
+      tableOutput("reference_table")
     ),
 
     tabPanel(
@@ -203,29 +165,25 @@ ui <- fluidPage(
         tags$li("Part 2: Gamma generalized linear model with log link for positive annual formal-care costs."),
         tags$li("Expected annual cost = probability of any cost multiplied by mean cost among positive-cost observations.")
       ),
-      h3("Predictors"),
+      h3("Inputs"),
       tags$p(
-        "Predictors include dementia state, age group, sex, years since diagnosis/index interval, death during interval, ",
+        "Inputs are dementia state, age group, sex, years since diagnosis/index interval, death during interval, ",
         "and institutionalization during interval. Death and institutionalization are interval-level descriptors."
       ),
       h3("Use"),
       tags$p(
         "The app is intended for research use in economic evaluation and care-resource planning scenarios. ",
-        "It is not a causal model, not an individual clinical decision tool, and not a replacement for local costing rules."
+        "Outputs are model-based conditional expected costs, not causal effects."
       ),
       h3("Implementation"),
-      tags$p(
-        "The public app uses coefficient tables only. It does not contain patient-level data, registry extracts, or fitted model objects."
-      ),
-      tags$p(
-        tags$a(href = "https://github.com/yohannesbalcha/ad-formal-care-cost-calculator", "View source code on GitHub")
-      )
+      tags$p("The public app uses coefficient tables only and does not contain patient-level data or fitted model objects."),
+      tags$p(tags$a(href = "https://github.com/yohannesbalcha/ad-formal-care-cost-calculator", "View source code on GitHub"))
     )
   )
 )
 
 server <- function(input, output, session) {
-  calc_data <- reactive({
+  scenario_data <- reactive({
     make_newdata(
       state_uc = input$calc_state_uc,
       age_band = input$calc_age_band,
@@ -236,11 +194,52 @@ server <- function(input, output, session) {
     )
   })
 
-  calc_prediction <- reactive({
-    predict_from_coefficients(calc_data())
+  scenario_prediction <- reactive({
+    predict_from_coefficients(scenario_data())
   })
 
-  output$calc_profile_summary <- renderUI({
+  state_predictions <- reactive({
+    nd <- make_newdata(
+      state_uc = state_levels,
+      age_band = input$calc_age_band,
+      sex = input$calc_sex,
+      ysdx = input$calc_ysdx,
+      died = input$calc_died,
+      inst_flag = input$calc_inst_flag
+    )
+    pred <- predict_from_coefficients(nd)
+    out <- data.frame(
+      state = factor(state_levels, levels = state_levels),
+      probability_any_cost = pred$probability_any_cost,
+      mean_positive_cost = pred$positive_cost_mean,
+      expected_annual_cost = pred$expected_annual_cost
+    )
+    out$conditional_difference_vs_no_dementia <- out$expected_annual_cost - out$expected_annual_cost[out$state == "No dementia"]
+    out$selected_profile <- as.character(out$state) == input$calc_state_uc
+    out
+  })
+
+  reference_predictions <- reactive({
+    nd <- make_newdata(
+      state_uc = state_levels,
+      age_band = "75-84",
+      sex = "FEMALE",
+      ysdx = "0",
+      died = "Alive",
+      inst_flag = "No"
+    )
+    pred <- predict_from_coefficients(nd)
+    out <- data.frame(
+      state = factor(state_levels, levels = state_levels),
+      probability_any_cost = pred$probability_any_cost,
+      mean_positive_cost = pred$positive_cost_mean,
+      expected_annual_cost = pred$expected_annual_cost
+    )
+    out$conditional_difference_vs_no_dementia <- out$expected_annual_cost - out$expected_annual_cost[out$state == "No dementia"]
+    out
+  })
+
+  output$profile_summary <- renderUI({
     tags$p(
       class = "text-muted",
       paste(
@@ -254,63 +253,31 @@ server <- function(input, output, session) {
     )
   })
 
-  output$calc_constructed_warning <- renderUI({
-    if (input$calc_state_uc == "No dementia" && input$calc_ysdx != "0") {
-      tags$div(
-        class = "alert alert-warning",
-        "No dementia with years since diagnosis/index interval greater than 0 is a constructed scenario. ",
-        "For controls, year 0 is usually the natural reference profile."
-      )
-    }
+  output$pred_total <- renderText({
+    format_money(scenario_prediction()$expected_annual_cost)
   })
 
-  output$calc_total <- renderText({
-    format_money(calc_prediction()$expected_annual_cost)
+  output$pred_prob <- renderText({
+    scales::percent(scenario_prediction()$probability_any_cost, accuracy = 0.1)
   })
 
-  output$calc_prob <- renderText({
-    scales::percent(calc_prediction()$probability_any_cost, accuracy = 0.1)
+  output$pred_positive <- renderText({
+    format_money(scenario_prediction()$positive_cost_mean)
   })
 
-  output$calc_positive <- renderText({
-    format_money(calc_prediction()$positive_cost_mean)
-  })
-
-  compare_predictions <- reactive({
-    nd <- make_newdata(
-      state_uc = state_levels,
-      age_band = input$cmp_age_band,
-      sex = input$cmp_sex,
-      ysdx = input$cmp_ysdx,
-      died = input$cmp_died,
-      inst_flag = input$cmp_inst_flag
-    )
-    pred <- predict_from_coefficients(nd)
-    out <- data.frame(
-      state = factor(state_levels, levels = state_levels),
-      probability_any_cost = pred$probability_any_cost,
-      mean_positive_cost = pred$positive_cost_mean,
-      expected_annual_cost = pred$expected_annual_cost
-    )
-    out$conditional_difference_vs_no_dementia <- out$expected_annual_cost - out$expected_annual_cost[out$state == "No dementia"]
-    out
-  })
-
-  output$cmp_interaction_warning <- renderUI({
-    if (input$cmp_died == "Died" || input$cmp_inst_flag == "Yes") {
-      tags$div(
-        class = "alert alert-warning",
-        "This is a high-cost interval scenario. Because the model includes interactions with death and institutionalization, ",
-        "the comparison is a conditional model prediction and may not show a monotonic severity gradient."
-      )
-    }
-  })
-
-  output$cmp_state_plot <- renderPlot({
-    plot_data <- compare_predictions()
+  plot_state_costs <- function(plot_data, highlight_selected = FALSE) {
     plot_data$plot_state <- factor(as.character(plot_data$state), levels = rev(state_levels))
-    ggplot(plot_data, aes(x = plot_state, y = expected_annual_cost)) +
-      geom_col(fill = "#0072B2", width = 0.68) +
+    base <- ggplot(plot_data, aes(x = plot_state, y = expected_annual_cost))
+
+    if (highlight_selected) {
+      base <- base +
+        geom_col(aes(fill = selected_profile), width = 0.68) +
+        scale_fill_manual(values = c(`FALSE` = "#8FBBD9", `TRUE` = "#D55E00"), guide = "none")
+    } else {
+      base <- base + geom_col(fill = "#0072B2", width = 0.68)
+    }
+
+    base +
       geom_text(
         aes(label = scales::comma(round(expected_annual_cost, 0))),
         hjust = -0.08,
@@ -318,19 +285,34 @@ server <- function(input, output, session) {
       ) +
       coord_flip() +
       scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.16))) +
-      labs(
-        x = NULL,
-        y = "Expected annual formal-care cost (SEK)"
-      ) +
+      labs(x = NULL, y = "Expected annual formal-care cost (SEK)") +
       theme_bw(base_size = 13) +
-      theme(
-        panel.grid.minor = element_blank(),
-        panel.grid.major.y = element_blank()
-      )
+      theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
+  }
+
+  output$state_plot <- renderPlot({
+    plot_state_costs(state_predictions(), highlight_selected = TRUE)
   })
 
-  output$cmp_state_table <- renderTable({
-    x <- compare_predictions()
+  output$state_table <- renderTable({
+    x <- state_predictions()
+    data.frame(
+      "Dementia state" = as.character(x$state),
+      "Selected" = ifelse(x$selected_profile, "Yes", ""),
+      "Probability of any cost" = scales::percent(x$probability_any_cost, accuracy = 0.1),
+      "Mean cost if positive" = format_money(x$mean_positive_cost),
+      "Expected annual cost" = format_money(x$expected_annual_cost),
+      "Conditional difference vs no dementia" = format_money(x$conditional_difference_vs_no_dementia),
+      check.names = FALSE
+    )
+  })
+
+  output$reference_plot <- renderPlot({
+    plot_state_costs(reference_predictions(), highlight_selected = FALSE)
+  })
+
+  output$reference_table <- renderTable({
+    x <- reference_predictions()
     data.frame(
       "Dementia state" = as.character(x$state),
       "Probability of any cost" = scales::percent(x$probability_any_cost, accuracy = 0.1),
@@ -340,15 +322,6 @@ server <- function(input, output, session) {
       check.names = FALSE
     )
   })
-
-  output$download_state_table <- downloadHandler(
-    filename = function() {
-      "ad_formal_care_cost_state_comparison.csv"
-    },
-    content = function(file) {
-      write.csv(compare_predictions(), file, row.names = FALSE)
-    }
-  )
 }
 
 shinyApp(ui, server)
