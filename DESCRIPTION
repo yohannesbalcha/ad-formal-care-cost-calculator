@@ -1,0 +1,12 @@
+Package: ADFormalCareCostCalculator
+Title: Alzheimer Disease Formal-Care Cost Calculator
+Version: 0.1.0
+Authors@R:
+    person("Yohannes Mengistu", "Balcha", role = c("aut", "cre"))
+Description: Public Shiny implementation of a two-part annual formal-care cost function for Alzheimer disease dementia.
+License: MIT
+Encoding: UTF-8
+Imports:
+    shiny,
+    ggplot2,
+    scales

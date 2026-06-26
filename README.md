@@ -59,3 +59,27 @@ The underlying individual-level registry data cannot be shared publicly because 
 
 The calculator returns conditional expected annual costs. It should not be interpreted as a causal model, an individual-level clinical prediction tool, or a replacement for local costing rules. Model outputs are intended for research use in economic evaluation and resource-planning scenarios.
 
+## Run From GitHub
+
+Technical users can run the app directly from GitHub with R:
+
+```r
+install.packages(c("shiny", "ggplot2", "scales"))
+shiny::runGitHub(
+  repo = "ad-formal-care-cost-calculator",
+  username = "yohannesbalcha",
+  subdir = "shiny"
+)
+```
+
+## Deploying to shinyapps.io
+
+After creating a shinyapps.io account, run the `rsconnect::setAccountInfo(...)` command from shinyapps.io locally in R. Do not save tokens in this repository.
+
+Then deploy from the repository root:
+
+```r
+source("deploy/deploy_shinyapps.R")
+```
+
+After deployment, add the live app URL to this README.

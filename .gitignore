@@ -10,6 +10,9 @@
 .DS_Store
 .vscode/
 
+# Deployment metadata
+rsconnect/
+
 # Restricted or patient-derived data
 data/
 results/
