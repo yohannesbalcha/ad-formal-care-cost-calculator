@@ -1,6 +1,6 @@
-# AD Formal-Care Cost Calculator
+# Alzheimer's disease dementia Formal-Care Cost Calculator
 
-This repository provides a public implementation of a two-part cost function for estimating annual formal-care costs in Alzheimer disease dementia.
+This repository provides a public implementation of a two-part cost function for estimating annual formal-care costs in Alzheimer's disease dementia.
 
 The calculator is intended for health economic modeling and scenario analysis. It estimates conditional expected annual formal-care costs from interval-level covariates.
 
